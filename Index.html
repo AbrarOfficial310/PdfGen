@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDF Generator</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+    <style>
+        body { font-family: sans-serif; padding: 20px; max-width: 400px; margin: auto; }
+        input, textarea { width: 100%; margin: 10px 0; padding: 12px; box-sizing: border-box; }
+        button { width: 100%; padding: 15px; background: #28a745; color: white; border: none; cursor: pointer; font-size: 16px; }
+        #status { margin-top: 10px; font-size: 14px; color: #555; }
+    </style>
+</head>
+<body>
+    <h2>Dummy PDF Generator</h2>
+    <input type="number" id="count" placeholder="Number of PDFs">
+    <input type="number" id="length" placeholder="Characters per PDF">
+    <textarea id="baseText" rows="4" placeholder="Enter base text"></textarea>
+    <button onclick="generate()">Generate & Zip</button>
+    <div id="status"></div>
+
+    <script>
+        async function generate() {
+            const status = document.getElementById('status');
+            const count = parseInt(document.getElementById('count').value);
+            const length = parseInt(document.getElementById('length').value);
+            const base = document.getElementById('baseText').value;
+            const zip = new JSZip();
+            const { jsPDF } = window.jspdf;
+
+            for (let i = 1; i <= count; i++) {
+                status.innerText = `Generating file ${i} of ${count}...`;
+                const doc = new jsPDF();
+                const content = (base + " " + Math.random().toString(36).substring(7)).repeat(1000).substring(0, length);
+                doc.text(content, 10, 10, { maxWidth: 180 });
+                zip.file(`Dummy_${i}.pdf`, doc.output("blob"));
+            }
+            status.innerText = "Creating Zip...";
+            zip.generateAsync({type:"blob"}).then(content => {
+                saveAs(content, "MyDummyPDFs.zip");
+                status.innerText = "Done!";
+            });
+        }
+    </script>
+</body>
+</html>
